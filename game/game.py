@@ -1,6 +1,7 @@
 from game.player import Player
 
 import random
+import numpy as np
 
 class Game:
     def __init__(self, player:Player, grid_size, start_pos = None, seed = None):
@@ -30,6 +31,25 @@ class Game:
     def generate_snack(self):
         empty_pos = [(x, y) for x in range(self.grid_size) for y in range(self.grid_size) if (x, y) not in self.player_body]
         self.snack = random.choice(empty_pos)
+
+    def get_game_state(self, vision=False):
+        if vision:
+            pass
+        else:
+            game_state = np.zeros((self.grid_size+2, self.grid_size+2))
+            for i in [0, self.grid_size + 1]:
+                for j in range(self.grid_size+2):
+                    game_state[i][j] = -1
+                    game_state[j][i] = -1
+            
+            for pos in self.player_body:
+                game_state[pos[0]][pos[1]] = -1
+
+            game_state[self.snack[0]][self.snack[1]] = 1
+
+            return game_state
+        
+
 
     def update(self):
         direction = self.player.direction

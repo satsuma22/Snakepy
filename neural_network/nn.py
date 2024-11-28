@@ -6,7 +6,7 @@ class FeedForwardNetwork:
     Acts as the snake's brain
     '''
 
-    def __init__(self, layer_sizes, input_dim, hidden_layer_activation='ReLU'):
+    def __init__(self, input_dim, layer_sizes, hidden_layer_activation='ReLU'):
         '''
         initializes the neural network
         '''

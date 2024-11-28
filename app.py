@@ -2,8 +2,9 @@ import pygame
 from pygame.surface import Surface
 
 from game.game import Game
-from game.player import Player
 from utils import Button
+
+from smart_player import SmartPlayer
 
 class Application:
     def __init__(self):
@@ -19,7 +20,7 @@ class Application:
         self.app_screen = pygame.display.set_mode((600, 700))
         pygame.display.set_caption('Snakepy')
         pygame.font.init()
-        self.player = Player()
+        self.player = SmartPlayer((self.game_grid_size + 2)**2)
         self.game = Game(self.player, self.game_grid_size)
         self.game_surface = Surface((self.game_screen_size, self.game_screen_size))
 
@@ -42,8 +43,9 @@ class Application:
 
     def _main_menu(self):
         play_button = Button(50, 50, 100, 50, 'Play')
+        auto_play_button = Button(50, 150, 100, 50, 'Self Play')
         quit_button = Button(50, 625, 100, 50, 'Quit')
-        button_list = [play_button, quit_button]
+        button_list = [play_button, auto_play_button, quit_button]
 
         run = True
         while run:
@@ -65,12 +67,15 @@ class Application:
                 if play_button.collidepoint(mouse):
                     self._play_game()
                     self.game.reset()
+                if auto_play_button.collidepoint(mouse):
+                    self._play_game(self_play=True)
+                    self.game.reset()
                 elif quit_button.collidepoint(mouse):
                     run = False
             
             pygame.display.update()
 
-    def _play_game(self):
+    def _play_game(self, self_play=False):
         run = True
 
         score_text = pygame.font.SysFont('Times New Roman MS', 50)
@@ -87,14 +92,18 @@ class Application:
             if keys[pygame.K_ESCAPE]:
                 run = False
             
-            if keys[pygame.K_UP] or keys[pygame.K_w]:
-                self.player.direction = (0, -1)
-            elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                self.player.direction = (0, 1)
-            elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                self.player.direction = (-1, 0)
-            elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                self.player.direction = (1, 0)
+            if self_play:
+                game_state = self.game.get_game_state()
+                self.player.predict_direction(game_state)
+            else:
+                if keys[pygame.K_UP] or keys[pygame.K_w]:
+                    self.player.direction = (0, -1)
+                elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                    self.player.direction = (0, 1)
+                elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                    self.player.direction = (-1, 0)
+                elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                    self.player.direction = (1, 0)
 
             pygame.time.delay(75)
 
