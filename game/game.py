@@ -1,5 +1,3 @@
-from game.player import Player
-
 import random
 import numpy as np
 

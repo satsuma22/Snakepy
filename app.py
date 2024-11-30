@@ -46,12 +46,12 @@ class Application:
                         "genetic_algorithm_settings" : {
                             "population_size" : 1000,
                             "parents_size" : 200,
-                            "selection_type_comment" : "choose between roulette wheel and tournament",
-                            "selection_type" : "tournament",
-                            "crossover_type_comment" : "choose between single point and uniform",
-                            "crossover_type" : "uniform",
-                            "mutation_type_comment" : "choose between boundary, flip and uniform",
-                            "mutation_type" : "uniform",
+                            "selection_type_comment" : "choose between roulette wheel selection and tournament selection",
+                            "selection_type" : "tournament selection",
+                            "crossover_type_comment" : "choose between single point crossover and uniform crossover",
+                            "crossover_type" : "uniform crossover",
+                            "mutation_type_comment" : "choose between boundary mutation, flip mutation and uniform mutation",
+                            "mutation_type" : "uniform mutation",
                             "mutation_rate" : 0.01
                             },
                         "game_settings" : {

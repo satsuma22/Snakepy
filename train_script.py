@@ -18,11 +18,10 @@ def train(iterations):
     hidden_layers = settings['network_settings']['hidden_layers']
     hidden_layer_activation = settings['network_settings']['hidden_layer_activation']
     population_size = int(settings['genetic_algorithm_settings']['population_size'])
-    parent_count = int(settings['genetic_algorithm_settings']['parents_size'])
     
     individuals = [SmartPlayer(input_dim, hidden_layers, hidden_layer_activation) for _ in range(population_size)]
     
-    population = Population(individuals, parent_count)
+    population = Population(individuals)
     
     population.load_population_parameters(str(individuals[0].network), hidden_layer_activation)
 

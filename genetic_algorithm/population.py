@@ -1,22 +1,27 @@
 import random
 import os
 import pickle
+import json
 
 from .selection import roulette_wheel_selection, tournament_selection
 from .crossover import single_point_crossover, uniform_crossover
 from .mutation import boundary_mutation, flip_mutation, uniform_mutation
 
 class Population:
-    def __init__(self, individuals, number_of_parents, save_dir='./checkpoints/'):
+    def __init__(self, individuals, save_dir='./checkpoints/'):
         self.individuals = individuals
         self.save_dir = save_dir
         self.generation = 0
         self.current_individual = 0
-        self.number_of_parents = number_of_parents
-        self.selection_type = 'tournament selection'
-        self.crossover_type = 'uniform crossover'
-        self.mutation_type = 'uniform mutation'
-        self.mutation_rate = 0.01
+        self.settings = None
+        with open('config.json', 'r') as fin:
+            self.settings = json.load(fin)
+
+        self.number_of_parents = self.settings['genetic_algorithm_settings']['parents_size']
+        self.selection_type = self.settings['genetic_algorithm_settings']['selection_type']
+        self.crossover_type = self.settings['genetic_algorithm_settings']['crossover_type']
+        self.mutation_type = self.settings['genetic_algorithm_settings']['mutation_type']
+        self.mutation_rate = self.settings['genetic_algorithm_settings']['mutation_rate']
 
     def __iter__(self):
         return self
