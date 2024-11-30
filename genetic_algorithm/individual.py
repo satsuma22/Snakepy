@@ -1,9 +1,9 @@
-
 class Individual:
 
     def __init__(self):
         pass
     
+
     @property
     def fitness(self):
         raise NotImplementedError('Please implement the fitness function for your class')

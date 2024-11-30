@@ -2,11 +2,14 @@ import pygame
 from pygame.surface import Surface
 
 from game.game import Game
+from game.player import Player
 from utils import Button
 
-from genetic_algorithm.population import Population
+from genetic_algorithm.utils import load_individual_parameters
 
 from smart_player import SmartPlayer
+
+import json
 
 class Application:
     def __init__(self):
@@ -15,17 +18,50 @@ class Application:
         self.app_screen = None
         self.game_screen = None
         self.game_screen_size = 600
-        self.game_grid_size = 30
-        self.game_rect_size = self.game_screen_size // self.game_grid_size
-        self.population = None
         self.game_state_type_vision = True
 
     def initialize(self):
+        self._load_config()
+        self.game_grid_size = self.settings['game_settings']['grid_size']
+        self.game_rect_size = self.game_screen_size // self.game_grid_size
+
         self.app_screen = pygame.display.set_mode((600, 700))
         pygame.display.set_caption('Snakepy')
         pygame.font.init()
-        self.game = Game(self.game_grid_size)
         self.game_surface = Surface((self.game_screen_size, self.game_screen_size))
+
+    def _load_config(self):
+        try:
+            with open('config.json', 'r') as fin:
+                self.settings = json.load(fin)
+                print('Loading configuration...')
+        except:
+            self.settings = {"network_settings": {
+                            "input_type_comment" : "choose between vision and game state",
+                            "input_type": "vision",
+                            "hidden_layers" : [8, 4],
+                            "hidden_layer_activation_comment" : "choose between ReLU and Sigmoid",
+                            "hidden_layer_activation" : "ReLU"
+                            },
+                        "genetic_algorithm_settings" : {
+                            "population_size" : 1000,
+                            "parents_size" : 200,
+                            "selection_type_comment" : "choose between roulette wheel and tournament",
+                            "selection_type" : "tournament",
+                            "crossover_type_comment" : "choose between single point and uniform",
+                            "crossover_type" : "uniform",
+                            "mutation_type_comment" : "choose between boundary, flip and uniform",
+                            "mutation_type" : "uniform",
+                            "mutation_rate" : 0.01
+                            },
+                        "game_settings" : {
+                            "grid_size" : 30
+                            }
+                        }
+            with open('config.json', 'w') as fout:
+                json.dump(self.settings, fout, indent=4)
+            
+
 
     def _draw_buttons(self, button_list, mouse):
         for button in button_list:
@@ -34,10 +70,10 @@ class Application:
             else:
                 button.draw(self.app_screen, 50)
 
-    def _draw_game(self):
+    def _draw_game(self, game):
         self.game_surface.fill((0, 0, 0))
-        body = self.game.player_body
-        snack = self.game.snack
+        body = game.player_body
+        snack = game.snack
 
         for pos in body:
             pygame.draw.rect(self.game_surface, (0, 255, 0), (pos[0]*self.game_rect_size, pos[1]*self.game_rect_size, self.game_rect_size, self.game_rect_size))
@@ -46,10 +82,9 @@ class Application:
 
     def _main_menu(self):
         play_button = Button(50, 50, 100, 50, 'Play')
-        auto_play_button = Button(50, 150, 100, 50, 'Self Play')
-        train_ga_button = Button(50, 200, 100, 50, 'Train')
+        ga_play_button = Button(50, 150, 300, 50, 'Genetic Algorithm')
         quit_button = Button(50, 625, 100, 50, 'Quit')
-        button_list = [play_button, auto_play_button, train_ga_button, quit_button]
+        button_list = [play_button, ga_play_button, quit_button]
 
         run = True
         while run:
@@ -70,25 +105,29 @@ class Application:
             if clicked:
                 if play_button.collidepoint(mouse):
                     self._play_game()
-                    self.game.reset()
-                elif auto_play_button.collidepoint(mouse):
-                    self._play_game(self_play=True)
-                    self.game.reset()
-                elif train_ga_button.collidepoint(mouse):
-                    self._train()
+                elif ga_play_button.collidepoint(mouse):
+                    self._auto_play()
                 elif quit_button.collidepoint(mouse):
                     run = False
             
             pygame.display.update()
 
-    def _play_game(self, self_play=False):
+    def _auto_play(self):
         run = True
-        player = SmartPlayer((self.game_grid_size + 2)**2)
-        if self_play and self.population is not None:
-            player = self.population.individuals[0]
+        game = Game(self.game_grid_size)
+
         score_text = pygame.font.SysFont('Times New Roman MS', 50)
-        print(player.network)
-        while run and not self.game.is_game_finished:
+
+        input_type = self.settings['network_settings']['input_type']
+        input_dim = 8 if input_type == 'vision' else (self.game_grid_size + 2)**2
+        hidden_layers = self.settings['network_settings']['hidden_layers']
+        hidden_layer_activation = self.settings['network_settings']['hidden_layer_activation']
+        player = SmartPlayer(input_dim, hidden_layers, hidden_layer_activation)
+
+        # load the trained model if available
+        load_individual_parameters(str(player.network), hidden_layer_activation, player)
+
+        while run and not game.is_game_finished:
             self.app_screen.fill(self.background_color)
 
             for event in pygame.event.get():
@@ -100,64 +139,60 @@ class Application:
             if keys[pygame.K_ESCAPE]:
                 run = False
             
-            if self_play:
-                game_state = self.game.get_game_state(self.game_state_type_vision)
-                player.predict_direction(game_state)
-            else:
-                if keys[pygame.K_UP] or keys[pygame.K_w]:
-                    player.direction = (0, -1)
-                elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
-                    player.direction = (0, 1)
-                elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
-                    player.direction = (-1, 0)
-                elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-                    player.direction = (1, 0)
+            game_state = game.get_game_state(self.game_state_type_vision)
+            player.predict_direction(game_state)
+            
+            pygame.time.delay(25)
 
-            pygame.time.delay(75)
-
-            self.game.update(player)
-            self._draw_game()
+            game.update(player)
+            self._draw_game(game)
 
             text_surface = score_text.render('Score: ' + str(player.score), True, self.text_color)
 
             self.app_screen.blit(text_surface, (0, 25))
             self.app_screen.blit(self.game_surface, (0, 100))
             pygame.display.update()
-        
-        player.reset()
 
-    def _train(self, iterations=10):
-        if self.population is None:
-            if self.game_state_type_vision:
-                self.population = Population([SmartPlayer(8) for _ in range(1000)])
-            else:
-                self.population = Population([SmartPlayer((self.game_grid_size+2)**2) for _ in range(1000)])
 
-        for _ in range(iterations):
-            scores = []
-            fitness = []
+    def _play_game(self):
+        run = True
+        game = Game(self.game_grid_size)
 
-            for individual in self.population:
-                while not self.game.is_game_finished and individual.alive:
-                    game_state = self.game.get_game_state(self.game_state_type_vision)
-                    individual.predict_direction(game_state)
-                    self.game.update(individual)
-                    if individual.steps_since_last_snack > 1000:
-                        individual.alive = False
-                scores.append(individual.score)
-                fitness.append(individual.fitness)
-                self.game.reset()
-
-            print('Generation #{} Statistics'.format(self.population.generation))
-            print('Average Score: {}'.format(sum(scores)/len(scores)))
-            print('Average Fitness: {}'.format(sum(fitness)/len(fitness)))
-            print('Highest Score: {}'.format(max(scores)))
-            print()
-
-            self.population.evolve_generation()
+        score_text = pygame.font.SysFont('Times New Roman MS', 50)
+        player = Player()
             
-            for individual in self.population:
-                individual.reset()
-    
+        while run and not game.is_game_finished:
+            self.app_screen.fill(self.background_color)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+            
+            keys = pygame.key.get_pressed()
+
+            if keys[pygame.K_ESCAPE]:
+                run = False
+            
+            if keys[pygame.K_UP] or keys[pygame.K_w]:
+                player.direction = (0, -1)
+            elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
+                player.direction = (0, 1)
+            elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                player.direction = (-1, 0)
+            elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+                player.direction = (1, 0)
+
+            pygame.time.delay(75)
+
+            game.update(player)
+            self._draw_game(game)
+
+            text_surface = score_text.render('Score: ' + str(player.score), True, self.text_color)
+
+            self.app_screen.blit(text_surface, (0, 25))
+            self.app_screen.blit(self.game_surface, (0, 100))
+            pygame.display.update()
+
+
     def run(self):
         self._main_menu()

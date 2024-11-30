@@ -5,9 +5,12 @@ from neural_network.nn import FeedForwardNetwork
 import numpy as np
 
 class SmartPlayer(Player, Individual):
-    def __init__(self, inp_dim):
+    def __init__(self, inp_dim, hidden_layers, hidden_layer_activation):
         super().__init__()
-        self.network = FeedForwardNetwork(inp_dim, [8, 4])
+        # output layer has to be equal to 4
+        hidden_layers_and_output = hidden_layers.copy()
+        hidden_layers_and_output.append(4)
+        self.network = FeedForwardNetwork(inp_dim, hidden_layers_and_output, hidden_layer_activation)
 
     def predict_direction(self, input):
         input = input.reshape(1, -1)

@@ -30,6 +30,8 @@ def single_point_crossover(parent1_params: Dict, parent2_params: Dict, order='r'
     child1_params = {}
     child2_params = {}
 
+    print(parent1_params.keys())
+    
     for key in parent1_params.keys():
         params_shape = parent1_params[key].shape
         number_of_weights = np.prod(params_shape)

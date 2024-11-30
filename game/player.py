@@ -1,6 +1,4 @@
-from abc import ABC, abstractmethod
-
-class Player(ABC):
+class Player:
     def __init__(self, direction=None):
         self.steps = 0
         self.score = 0

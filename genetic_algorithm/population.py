@@ -1,11 +1,13 @@
 import random
+import os
+import pickle
 
 from .selection import roulette_wheel_selection, tournament_selection
 from .crossover import single_point_crossover, uniform_crossover
 from .mutation import boundary_mutation, flip_mutation, uniform_mutation
 
 class Population:
-    def __init__(self, individuals, number_of_parents = 200, save_dir='./checkpoints/'):
+    def __init__(self, individuals, number_of_parents, save_dir='./checkpoints/'):
         self.individuals = individuals
         self.save_dir = save_dir
         self.generation = 0
@@ -78,4 +80,34 @@ class Population:
 
         self.generation += 1
         
+    def save_population_parameters(self):
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
             
+        all_params = []
+        for individual in self.individuals:
+            all_params.append(individual.parameters)
+
+        save_file = {'parameters': all_params, 'generation': self.generation}
+
+        with open(os.path.join(self.save_dir, '{}-{}-parameters.pkl'.format(str(self.individuals[0].network), self.individuals[0].network.hidden_layer_activation)), 'wb') as fout:
+            pickle.dump(save_file, fout)
+
+        print('Saving Parameters...')
+
+    def load_population_parameters(self, layers, activation):
+        path = os.path.join(self.save_dir, '{}-{}-parameters.pkl'.format(layers, activation))
+        try:
+            with open(path, 'rb') as fin:
+                save_file = pickle.load(fin)
+
+            parameters = save_file['parameters']
+            generation = save_file['generation']
+            
+            for i, individual in enumerate(self.individuals):
+                individual.parameters = parameters[i]
+            self.generation = generation
+
+            print('Generation #{} loaded.'.format(self.generation))
+        except:
+            print('No saved parameters found.')

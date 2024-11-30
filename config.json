@@ -1,0 +1,26 @@
+{
+    "network_settings": {
+        "input_type_comment": "choose between vision and game state",
+        "input_type": "vision",
+        "hidden_layers": [
+            8,
+            4
+        ],
+        "hidden_layer_activation_comment": "choose between ReLU and Sigmoid",
+        "hidden_layer_activation": "ReLU"
+    },
+    "genetic_algorithm_settings": {
+        "population_size": 1000,
+        "parents_size": 200,
+        "selection_type_comment": "choose between roulette wheel and tournament",
+        "selection_type": "tournament",
+        "crossover_type_comment": "choose between single point and uniform",
+        "crossover_type": "uniform",
+        "mutation_type_comment": "choose between boundary, flip and uniform",
+        "mutation_type": "uniform",
+        "mutation_rate": 0.01
+    },
+    "game_settings": {
+        "grid_size": 30
+    }
+}
