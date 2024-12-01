@@ -1,4 +1,5 @@
 # Snakepy
+![Example GIF](generation-28-default.gif)
 
 ## Table of Contents
 - [About the Project](#about-the-project)
@@ -26,3 +27,6 @@ For training the agent, use the script `train_script.py`. While running the scri
 ```bash
 python train_script.py [number_of_generations]
 ```
+
+## Configuration
+The settings for the application can be configured via the `config.json` file. In case the `config.json` file is missing, running `main.py` will generate a configuration file with deafult values.
