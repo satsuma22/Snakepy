@@ -152,7 +152,7 @@ class Application:
 
             text_surface = score_text.render('Score: ' + str(player.score), True, self.text_color)
 
-            self.app_screen.blit(text_surface, (0, 25))
+            self.app_screen.blit(text_surface, (225, 25))
             self.app_screen.blit(self.game_surface, (0, 100))
             pygame.display.update()
 
@@ -192,7 +192,7 @@ class Application:
 
             text_surface = score_text.render('Score: ' + str(player.score), True, self.text_color)
 
-            self.app_screen.blit(text_surface, (0, 25))
+            self.app_screen.blit(text_surface, (225, 25))
             self.app_screen.blit(self.game_surface, (0, 100))
             pygame.display.update()
 
