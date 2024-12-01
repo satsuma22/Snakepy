@@ -109,8 +109,8 @@ class Population:
             parameters = save_file['parameters']
             generation = save_file['generation']
             
-            for i, individual in enumerate(self.individuals):
-                individual.parameters = parameters[i]
+            for i, parameter in enumerate(parameters):
+                self.individuals[i].parameters = parameter
             self.generation = generation
 
             print('Generation #{} loaded.'.format(self.generation))

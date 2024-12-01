@@ -145,6 +145,9 @@ class Application:
             pygame.time.delay(25)
 
             game.update(player)
+            if player.steps_since_last_snack > 200:
+                player.alive = False
+                game.is_game_finished = True
             self._draw_game(game)
 
             text_surface = score_text.render('Score: ' + str(player.score), True, self.text_color)
