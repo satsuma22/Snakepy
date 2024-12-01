@@ -1,6 +1,9 @@
 # Snakepy
+<div align="center>
 ![Example GIF](generation-28-default.gif)
-
+  
+</div>
+  
 ## Table of Contents
 - [About the Project](#about-the-project)
 - [Installing Dependencies](#installing-dependencies)
