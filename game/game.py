@@ -75,9 +75,9 @@ class Game:
                     game_state[j][i] = -1
             
             for pos in self.player_body:
-                game_state[pos[0]][pos[1]] = -1
+                game_state[pos[0]+1][pos[1]+1] = -1
 
-            game_state[self.snack[0]][self.snack[1]] = 1
+            game_state[self.snack[0]+1][self.snack[1]+1] = 1
 
             return game_state
         
